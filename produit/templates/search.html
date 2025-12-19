@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+
+{% block title %}Rechercher des Produits{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow-sm">
+            <div class="card-header bg-success text-white">
+                <h2 class="mb-0">Rechercher un produit</h2>
+            </div>
+            <div class="card-body">
+                <form action="" method="GET">
+                    <div class="mb-3">
+                        <label for="search" class="form-label">Entrez le nom du produit ou un ingrédient</label>
+                        <div class="input-group">
+                            <input type="text" 
+                                   name="search" 
+                                   id="search" 
+                                   class="form-control" 
+                                   placeholder="Ex: Chocolat, Sucre..."
+                                   value="{{ query|default:'' }}">
+                            <button type="submit" class="btn btn-success">
+                                Rechercher
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        {% if query %}
+            <div class="card shadow-sm mt-4">
+                <div class="card-body">
+                    {% if no_level1_results %}
+                        <div class="alert alert-warning">
+                            <strong>Recherche niveau 1</strong> - Aucun produit trouvé avec le nom "{{ query }}"
+                        </div>
+                    {% endif %}
+
+                    {% if products %}
+                        <h4 class="mb-3">
+                            {% if search_level == 1 %}
+                                Résultats de recherche (niveau 1)
+                            {% else %}
+                                Résultats de recherche (niveau 2 - par ingrédients)
+                            {% endif %}
+                        </h4>
+                        <div class="table-responsive">
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Nom du Produit</th>
+                                        <th>Prix</th>
+                                        <th>Ingrédients</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for product in products %}
+                                    <tr>
+                                        <td><strong>{{ product.prd_name }}</strong></td>
+                                        <td>{{ product.prd_price }} DA</td>
+                                        <td>{{ product.prd_ingredients|default:"Non spécifiés" }}</td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    {% else %}
+                        {% if not no_level1_results %}
+                            <div class="alert alert-warning">
+                                Aucun produit trouvé pour "{{ query }}"
+                            </div>
+                        {% else %}
+                            <div class="alert alert-danger">
+                                <strong>Recherche niveau 2</strong> - Aucun produit trouvé contenant "{{ query }}" dans les ingrédients.
+                            </div>
+                        {% endif %}
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

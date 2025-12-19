@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Modifier la Commande{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning">
+                <h2 class="mb-0">Modifier la commande #{{ commande.id }}</h2>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.Description_cmd.id_for_label }}" class="form-label">
+                            {{ form.Description_cmd.label }}
+                        </label>
+                        {{ form.Description_cmd }}
+                        {% if form.Description_cmd.errors %}
+                            <div class="text-danger">{{ form.Description_cmd.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.Date_cmd.id_for_label }}" class="form-label">
+                            {{ form.Date_cmd.label }}
+                        </label>
+                        {{ form.Date_cmd }}
+                        {% if form.Date_cmd.errors %}
+                            <div class="text-danger">{{ form.Date_cmd.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.Produit_cmd.id_for_label }}" class="form-label">
+                            {{ form.Produit_cmd.label }}
+                        </label>
+                        {{ form.Produit_cmd }}
+                        {% if form.Produit_cmd.errors %}
+                            <div class="text-danger">{{ form.Produit_cmd.errors }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-warning btn-lg">
+                            Enregistrer les modifications
+                        </button>
+                        <a href="{% url 'CmdList' %}" class="btn btn-secondary">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

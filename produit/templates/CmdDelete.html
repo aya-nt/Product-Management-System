@@ -1,0 +1,43 @@
+{% extends 'base.html' %}
+
+{% block title %}Supprimer la Commande{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-6 offset-md-3">
+        <div class="card shadow-sm border-danger">
+            <div class="card-header bg-danger text-white">
+                <h2 class="mb-0">Confirmation de suppression</h2>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Attention !</strong> Cette action est irréversible.
+                </div>
+                
+                <p>Êtes-vous sûr de vouloir supprimer cette commande ?</p>
+                
+                <div class="card mb-3">
+                    <div class="card-body">
+                        <p class="mb-1"><strong>ID:</strong> {{ commande.id }}</p>
+                        <p class="mb-1"><strong>Description:</strong> {{ commande.Description_cmd }}</p>
+                        <p class="mb-1"><strong>Date:</strong> {{ commande.Date_cmd|date:"d/m/Y" }}</p>
+                        <p class="mb-0"><strong>Produit:</strong> {{ commande.Produit_cmd.prd_name }}</p>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            Oui, supprimer
+                        </button>
+                        <a href="{% url 'CmdList' %}" class="btn btn-secondary">
+                            Annuler
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
