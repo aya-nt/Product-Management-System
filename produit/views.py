@@ -2,6 +2,13 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .models import Product, Commande
 from .forms import CommandeForm
+import os
+from supabase import create_client, Client
+
+supabase: Client = create_client(
+    os.environ.get("VITE_SUPABASE_URL"),
+    os.environ.get("VITE_SUPABASE_ANON_KEY")
+)
 
 
 def afficher_produits(request):
@@ -9,8 +16,21 @@ def afficher_produits(request):
     Display all products in the database.
     URL: /list_produits/
     """
-    produits = Product.objects.all()
-    return render(request, "index.html", {"products": produits})
+    try:
+        response = supabase.table("products").select("*").execute()
+        produits = response.data
+        formatted_products = [
+            {
+                "prd_name": p["name"],
+                "prd_price": p["price"],
+                "prd_ingredients": p["ingredients"]
+            }
+            for p in produits
+        ]
+        return render(request, "index.html", {"products": formatted_products})
+    except Exception as e:
+        print(f"Error fetching products: {e}")
+        return render(request, "index.html", {"products": []})
 
 
 def rechercher_produits(request):
@@ -20,31 +40,48 @@ def rechercher_produits(request):
     """
     if request.method == "GET":
         query = request.GET.get('search', '').strip()
-        
+
         if query:
-            # Level 1 search: Search by product name
-            produits = Product.objects.filter(prd_name__icontains=query)
-            
-            if produits.exists():
-                # Found products by name
-                return render(request, 'search.html', {
-                    'products': produits,
-                    'query': query,
-                    'search_level': 1
-                })
-            else:
-                # Level 2 search: Search by ingredients
-                produits_ingredients = Product.objects.filter(
-                    prd_ingredients__icontains=query
-                )
-                
-                return render(request, 'search.html', {
-                    'products': produits_ingredients,
-                    'query': query,
-                    'search_level': 2,
-                    'no_level1_results': True
-                })
-        
+            try:
+                all_products = supabase.table("products").select("*").execute().data
+
+                produits = [
+                    {
+                        "prd_name": p["name"],
+                        "prd_price": p["price"],
+                        "prd_ingredients": p["ingredients"]
+                    }
+                    for p in all_products
+                    if query.lower() in p["name"].lower()
+                ]
+
+                if produits:
+                    return render(request, 'search.html', {
+                        'products': produits,
+                        'query': query,
+                        'search_level': 1
+                    })
+                else:
+                    produits_ingredients = [
+                        {
+                            "prd_name": p["name"],
+                            "prd_price": p["price"],
+                            "prd_ingredients": p["ingredients"]
+                        }
+                        for p in all_products
+                        if query.lower() in p["ingredients"].lower()
+                    ]
+
+                    return render(request, 'search.html', {
+                        'products': produits_ingredients,
+                        'query': query,
+                        'search_level': 2,
+                        'no_level1_results': True
+                    })
+            except Exception as e:
+                print(f"Error searching products: {e}")
+                return render(request, 'search.html', {'query': query})
+
         return render(request, 'search.html')
 
 
