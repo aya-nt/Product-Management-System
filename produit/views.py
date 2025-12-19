@@ -7,7 +7,7 @@ from supabase import create_client, Client
 
 supabase: Client = create_client(
     os.environ.get("VITE_SUPABASE_URL"),
-    os.environ.get("VITE_SUPABASE_ANON_KEY")
+    os.environ.get("VITE_SUPABASE_ANON_KEY") or os.environ.get("VITE_SUPABASE_SUPABASE_ANON_KEY")
 )
 
 
@@ -19,6 +19,7 @@ def afficher_produits(request):
     try:
         response = supabase.table("products").select("*").execute()
         produits = response.data
+        print(f"DEBUG: Fetched {len(produits)} products from Supabase")
         formatted_products = [
             {
                 "prd_name": p["name"],
@@ -29,7 +30,9 @@ def afficher_produits(request):
         ]
         return render(request, "index.html", {"products": formatted_products})
     except Exception as e:
+        import traceback
         print(f"Error fetching products: {e}")
+        traceback.print_exc()
         return render(request, "index.html", {"products": []})
 
 
