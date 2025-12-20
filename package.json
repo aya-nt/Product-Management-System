@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "echo 'Django project - no build needed'"
+    "build": "echo 'Django project - no build needed'",
+     "build": "pip install -r requirements.txt"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
