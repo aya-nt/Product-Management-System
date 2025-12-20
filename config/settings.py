@@ -5,6 +5,23 @@ Django settings for config project.
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+# Add these lines to your settings.py
+import os
+from pathlib import Path
+
+# Build paths inside the project like this: BASE_DIR / 'subdir'.
+BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Static files (CSS, JavaScript, Images)
+# https://docs.djangoproject.com/en/4.2/howto/static-files/
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')  # Add this line
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]  # If you have additional static files
+
+# For production, you might want to add these as well
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 load_dotenv()
 

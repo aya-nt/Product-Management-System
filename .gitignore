@@ -69,3 +69,7 @@ coverage.xml
 # Local development
 .DS_Store
 Thumbs.db
+
+# Static files
+/staticfiles/
+/media/
