@@ -57,9 +57,15 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-fallback-key-for-dev-only')
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# Update ALLOWED_HOSTS
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
-
-ALLOWED_HOSTS = ['*']  # For testing, but restrict in production
+# Add this for Vercel deployment
+if os.getenv('VERCEL'):
+    DEBUG = False
+    SECURE_SSL_REDIRECT = True
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
 
 DEBUG = os.getenv('DEBUG', 'False') == 'True'
 if not DEBUG:
