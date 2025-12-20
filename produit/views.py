@@ -12,6 +12,7 @@ supabase: Client = create_client(
 )
 
 @require_http_methods(["POST"])
+
 def delete_commande(request, commande_id):
     commande = get_object_or_404(Commande, id=commande_id)
     commande.delete()

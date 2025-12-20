@@ -1,53 +1,46 @@
-# Django Product Management System
+# Gestion des Produits - Product Management System
 
-A complete Django web application for managing products and orders (commandes) .
+A modern web application for managing products and orders, built with Django and Supabase.
 
-## Features
+## 🌟 Features
 
-- **Product Listing**: Display all available products
-- **Product Search**: Search products by name and ingredients (2-level search)
-- **Order Management**: Create, view, edit, and delete orders
-- **Bootstrap Integration**: Modern, responsive UI with Bootstrap 5
+- **Product Management**: View and manage products from Supabase
+- **Order System**: Create and track orders
+- **Search Functionality**: Search products by name or ingredients
+- **Responsive Design**: Works on all devices
+- **Modern UI**: Clean and intuitive interface
 
-## Project Structure
+## 🛠 Technologies Used
 
-```
-project/
-├── manage.py
-├── config/
-│   ├── __init__.py
-│   ├── settings.py
-│   ├── urls.py
-│   └── wsgi.py
-└── produit/
-    ├── __init__.py
-    ├── models.py
-    ├── views.py
-    ├── urls.py
-    ├── forms.py
-    ├── admin.py
-    └── templates/
-        ├── base.html
-        ├── index.html
-        ├── search.html
-        ├── commande.html
-        ├── CmdList.html
-        └── CmdEdit.html
-```
+### Backend
+- **Django 4.2**: High-level Python web framework
+- **Django Templates**: Server-side rendering
+- **Supabase**: Backend-as-a-Service for product data
+- **PostgreSQL**: Database (via Supabase)
 
-## URLs
+### Frontend
+- **Bootstrap 5.2**: Responsive CSS framework
+- **Bootstrap Icons**: Modern icon set
+- **JavaScript**: For interactive elements
+- **HTML5 & CSS3**: With modern features and variables
 
-| URL | Description |
-|-----|-------------|
-| `/list_produits/` | Display all products |
-| `/search_product/` | Search for products |
-| `/commander/` | Create a new order |
-| `/commandes/` | View all orders |
-| `/commandes/edit/<id>/` | Edit an order |
-| `/commandes/delete/<id>/` | Delete an order |
+### Development Tools
+- **Python 3.x**
+- **Pip**: Package management
+- **Git**: Version control
 
-## Technologies Used
+## 🚀 Getting Started
 
-- Django 4.x
-- Bootstrap 5.2
-- SQLite (default Django database)
+### Prerequisites
+
+- Python 3.8+
+- pip (Python package manager)
+- Supabase account and project
+- Node.js (for frontend dependencies, if any)
+
+### Installation
+
+1. **Clone the repository**
+   ```bash
+   git clone (https://github.com/your-username/product-management-system.git)
+   cd product-management-system
