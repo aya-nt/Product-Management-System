@@ -3,6 +3,17 @@ Django settings for config project.
 """
 
 from pathlib import Path
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+# Debug: Print environment variables
+print("="*50)
+print("Checking environment variables...")
+print("SUPABASE_URL:", os.getenv("VITE_SUPABASE_URL"))
+print("SUPABASE_ANON_KEY exists:", bool(os.getenv("VITE_SUPABASE_ANON_KEY")))
+print("="*50)
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

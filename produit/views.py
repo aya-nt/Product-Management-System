@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
+from django.views.decorators.http import require_http_methods
 from .models import Product, Commande
 from .forms import CommandeForm
 import os
@@ -9,6 +10,13 @@ supabase: Client = create_client(
     os.environ.get("VITE_SUPABASE_URL"),
     os.environ.get("VITE_SUPABASE_ANON_KEY") or os.environ.get("VITE_SUPABASE_SUPABASE_ANON_KEY")
 )
+
+@require_http_methods(["POST"])
+def delete_commande(request, commande_id):
+    commande = get_object_or_404(Commande, id=commande_id)
+    commande.delete()
+    messages.success(request, 'La commande a été supprimée avec succès.')
+    return redirect('CmdList')
 
 
 def afficher_produits(request):
@@ -89,31 +97,73 @@ def rechercher_produits(request):
 
 
 def commander_prd(request):
-    """
-    Create a new order (commande).
-    URL: /commander/
-    """
+    # Fetch products from Supabase
+    try:
+        response = supabase.table("products").select("*").execute()
+        products = response.data
+    except Exception as e:
+        print(f"ERROR fetching products from Supabase: {str(e)}")
+        products = []
+        messages.error(request, "Erreur lors du chargement des produits. Veuillez réessayer plus tard.")
+
     if request.method == 'POST':
         form = CommandeForm(request.POST)
         
         if form.is_valid():
-            form.save()
-            messages.success(request, 'Commande envoyée avec succès!')
-            return redirect('commander')
+            try:
+                product_id = request.POST.get('Produit_cmd')
+                if not product_id:
+                    raise forms.ValidationError("Veuillez sélectionner un produit")
+                
+                # Get the selected product from Supabase
+                response = supabase.table("products").select("*").eq("id", product_id).execute()
+                if not response.data:
+                    raise Exception("Produit sélectionné non trouvé")
+                
+                product_data = response.data[0]
+                
+                # Create or update the local Product instance
+                product, created = Product.objects.update_or_create(
+                    id=product_data['id'],
+                    defaults={
+                        'prd_name': product_data['name'],
+                        'prd_price': product_data['price'],
+                        'prd_ingredients': product_data.get('ingredients', '')
+                    }
+                )
+                
+                # Create the order
+                commande = Commande(
+                    Description_cmd=form.cleaned_data['Description_cmd'],
+                    Date_cmd=form.cleaned_data['Date_cmd'],
+                    Produit_cmd=product
+                )
+                commande.save()
+                
+                messages.success(request, 'Commande envoyée avec succès!')
+                return redirect('CmdList')
+                
+            except Exception as e:
+                print(f"Error creating order: {e}")
+                messages.error(request, f"Erreur lors de l'envoi de la commande: {str(e)}")
     else:
         form = CommandeForm()
-    
-    message = "Veuillez remplir tous les champs pour passer une commande."
-    return render(request, "commande.html", {"form": form, "message": message})
 
+    return render(request, 'commande.html', {
+        'form': form,
+        'products': products
+    })
+            
 
 def afficher_cmd(request):
     """
     Display all orders (commandes).
     URL: /commandes/
     """
-    cmds = Commande.objects.all()
-    return render(request, "CmdList.html", {"commandes": cmds})
+    # Get all orders from the database
+    commandes = Commande.objects.select_related('Produit_cmd').all().order_by('-Date_cmd')
+    
+    return render(request, 'CmdList.html', {'commandes': commandes})
 
 
 def edit_cmd(request, pk):

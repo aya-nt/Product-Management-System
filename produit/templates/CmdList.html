@@ -3,60 +3,97 @@
 {% block title %}Liste des Commandes{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                <h2 class="mb-0">Liste des commandes</h2>
-                <a href="{% url 'commander' %}" class="btn btn-light">
-                    Nouvelle commande
-                </a>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2>Liste des Commandes</h2>
+        <a href="{% url 'commander' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle"></i> Nouvelle Commande
+        </a>
+    </div>
+    
+    {% if commandes %}
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Date</th>
+                        <th>Produit</th>
+                        <th>Prix</th>
+                        <th>Description</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for commande in commandes %}
+                    <tr>
+                        <td>{{ commande.Date_cmd|date:"d/m/Y" }}</td>
+                        <td>{{ commande.Produit_cmd.prd_name }}</td>
+                        <td>{{ commande.Produit_cmd.prd_price }} DA</td>
+                        <td>{{ commande.Description_cmd }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-danger btn-delete" 
+                                    data-delete-url="{% url 'delete_commande' commande.id %}">
+                                <i class="bi bi-trash"></i> Supprimer
+                            </button>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <i class="bi bi-info-circle"></i> Aucune commande pour le moment.
+        </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="bi bi-exclamation-triangle-fill me-2"></i>Confirmer la suppression
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="card-body">
-                {% if commandes %}
-                    <div class="table-responsive">
-                        <table class="table table-striped table-hover">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>ID</th>
-                                    <th>Description</th>
-                                    <th>Date</th>
-                                    <th>Produit</th>
-                                    <th>Prix</th>
-                                    <th class="text-center">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for cmd in commandes %}
-                                <tr>
-                                    <td>{{ cmd.id }}</td>
-                                    <td>{{ cmd.Description_cmd }}</td>
-                                    <td>{{ cmd.Date_cmd|date:"d/m/Y" }}</td>
-                                    <td>{{ cmd.Produit_cmd.prd_name }}</td>
-                                    <td>{{ cmd.Produit_cmd.prd_price }} DA</td>
-                                    <td class="text-center">
-                                        <a href="{% url 'CmdEdit' cmd.id %}" 
-                                           class="btn btn-sm btn-warning">
-                                            Modifier
-                                        </a>
-                                        <a href="{% url 'CmdDelete' cmd.id %}" 
-                                           class="btn btn-sm btn-danger">
-                                            Supprimer
-                                        </a>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                {% else %}
-                    <div class="alert alert-info">
-                        <i class="bi bi-info-circle"></i> Aucune commande enregistrée pour le moment.
-                        <a href="{% url 'commander' %}" class="alert-link">Passez votre première commande !</a>
-                    </div>
-                {% endif %}
-            </div>
+            <form id="deleteForm" method="post">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer cette commande ?</p>
+                    <p class="fw-bold">Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="bi bi-x-circle me-1"></i> Annuler
+                    </button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="bi bi-trash me-1"></i> Supprimer
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const deleteForm = document.getElementById('deleteForm');
+    
+    // Handle delete button clicks
+    document.querySelectorAll('.btn-delete').forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            const deleteUrl = this.getAttribute('data-delete-url');
+            deleteForm.action = deleteUrl;
+            const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+            modal.show();
+        });
+    });
+});
+</script>
+{% endblock %}
+
 {% endblock %}
