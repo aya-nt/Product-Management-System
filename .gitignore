@@ -73,3 +73,8 @@ Thumbs.db
 # Static files
 /staticfiles/
 /media/
+
+# Environment variables
+.env
+.env.*
+!.env.example
