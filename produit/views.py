@@ -1,15 +1,28 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from django.views.decorators.http import require_http_methods
+from django.core.exceptions import ValidationError
 from .models import Product, Commande
 from .forms import CommandeForm
 import os
 from supabase import create_client, Client
 
-supabase: Client = create_client(
-    os.environ.get("VITE_SUPABASE_URL"),
-    os.environ.get("VITE_SUPABASE_ANON_KEY") or os.environ.get("VITE_SUPABASE_SUPABASE_ANON_KEY")
-)
+# Initialize Supabase client safely
+def get_supabase_client():
+    """Get Supabase client, return None if credentials are missing"""
+    supabase_url = os.environ.get("VITE_SUPABASE_URL") or os.environ.get("SUPABASE_URL")
+    supabase_key = os.environ.get("VITE_SUPABASE_ANON_KEY") or os.environ.get("SUPABASE_ANON_KEY")
+    
+    if not supabase_url or not supabase_key:
+        return None
+    
+    try:
+        return create_client(supabase_url, supabase_key)
+    except Exception as e:
+        print(f"Error creating Supabase client: {e}")
+        return None
+
+supabase = get_supabase_client()
 
 @require_http_methods(["POST"])
 
@@ -25,6 +38,10 @@ def afficher_produits(request):
     Display all products in the database.
     URL: /list_produits/
     """
+    if not supabase:
+        messages.error(request, "Configuration Supabase manquante")
+        return render(request, "index.html", {"products": []})
+    
     try:
         response = supabase.table("products").select("*").execute()
         produits = response.data
@@ -50,6 +67,9 @@ def rechercher_produits(request):
     Search for products by name or ingredients (2-level search).
     URL: /search_product/
     """
+    if not supabase:
+        return render(request, 'search.html', {'error': 'Configuration Supabase manquante'})
+    
     if request.method == "GET":
         query = request.GET.get('search', '').strip()
 
@@ -98,6 +118,13 @@ def rechercher_produits(request):
 
 
 def commander_prd(request):
+    if not supabase:
+        messages.error(request, "Configuration Supabase manquante")
+        return render(request, 'commande.html', {
+            'form': CommandeForm(),
+            'products': []
+        })
+    
     # Fetch products from Supabase
     try:
         response = supabase.table("products").select("*").execute()
@@ -114,7 +141,10 @@ def commander_prd(request):
             try:
                 product_id = request.POST.get('Produit_cmd')
                 if not product_id:
-                    raise forms.ValidationError("Veuillez sélectionner un produit")
+                    raise ValidationError("Veuillez sélectionner un produit")
+                
+                if not supabase:
+                    raise Exception("Configuration Supabase manquante")
                 
                 # Get the selected product from Supabase
                 response = supabase.table("products").select("*").eq("id", product_id).execute()
